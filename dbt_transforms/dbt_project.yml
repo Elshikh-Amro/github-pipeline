@@ -1,0 +1,12 @@
+name: dbt_transforms
+profile: dbt_transforms
+model-paths: ["models"]
+
+models:
+  dbt_transforms:
+    staging:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table
+      +schema: marts

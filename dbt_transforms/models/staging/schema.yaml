@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: stg_repos
+    columns:
+      - name: repo_id
+        tests: [unique, not_null]
+  - name: stg_commits
+    columns:
+      - name: sha
+        tests: [unique, not_null]
+  - name: stg_issues
+    columns:
+      - name: issue_id
+        tests: [unique, not_null]
+      - name: state
+        tests:
+          - accepted_values:
+              values: ['open', 'closed']

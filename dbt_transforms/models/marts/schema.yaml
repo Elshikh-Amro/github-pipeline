@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: dim_repositories
+    columns:
+      - name: repo_id
+        tests: [unique, not_null]
+  - name: fact_commits
+    columns:
+      - name: sha
+        tests: [unique, not_null]
+      - name: repo_id
+        tests:
+          - relationships:
+              to: ref('dim_repositories')
+              field: repo_id

@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw
+    database: github_analytics
+    schema: public
+    tables:
+      - name: raw_repos
+      - name: raw_commits
+      - name: raw_issues
