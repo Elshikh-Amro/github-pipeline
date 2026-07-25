@@ -45,3 +45,52 @@ Next Up (Week 2)
 - Create staging models (clean/cast raw data)
 - Build star schema (dimensions + facts)
 - Add data quality tests
+```
+
+# Week 2 — dbt Transformations ✅
+
+## Tools Learned
+- **dbt-core + dbt-postgres** — transformation framework
+- **dbt models** — views (staging) and tables (marts)
+- **dbt tests** — not_null, unique, accepted_values, relationships
+- **dbt docs** — auto-generated lineage graph
+
+## Project Structure Added
+dbt_transforms/
+├── dbt_project.yml
+├── models/
+│   ├── sources.yml
+│   ├── staging/
+│   │   ├── stg_repos.sql
+│   │   ├── stg_commits.sql
+│   │   ├── stg_issues.sql
+│   │   └── schema.yml
+│   └── marts/
+│       ├── dim_repositories.sql
+│       ├── dim_dates.sql
+│       ├── fact_commits.sql
+│       └── schema.yml
+
+## Star Schema
+| Table | Type | Rows | Description |
+|-------|------|------|-------------|
+| `dim_repositories` | Dimension | 50 | Unique repos from raw_repos |
+| `dim_dates` | Dimension | 845 | Calendar dates from commits/issues |
+| `fact_commits` | Fact | 4,861 | Commit facts linked to dims |
+
+## Commands to Run Next Time
+```bash
+cd ~/OpenCode/github-pipline
+conda activate de-pipeline
+docker compose up -d
+cd dbt_transforms
+dbt debug
+dbt run
+dbt test
+git log
+Next Up (Week 3)
+- Install Prefect
+- Wrap ingestion in Prefect flows
+- Task dependencies, retry, scheduling
+- Parameterization (language, repo count)
+```
