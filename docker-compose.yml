@@ -9,5 +9,37 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - prefect_pgdata:/var/lib/postgresql/prefect_data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  prefect-server:
+    image: prefecthq/prefect:3-python3.12
+    command: >
+      prefect server start --host 0.0.0.0
+    environment:
+      PREFECT_API_DATABASE_CONNECTION_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/github_analytics"
+    ports:
+      - "4200:4200"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    build: .
+    command: python flows/deploy.py
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      DBT_ALLOW_EXPERIMENTAL_ADAPTERS: "true"
+    depends_on:
+      prefect-server:
+        condition: service_started
+    volumes:
+      - .:/app
 volumes:
   pgdata:
+  prefect_pgdata:

@@ -94,3 +94,38 @@ Next Up (Week 3)
 - Task dependencies, retry, scheduling
 - Parameterization (language, repo count)
 ```
+# Week 3 — Prefect Orchestration ✅
+
+## Tools Learned
+- **Prefect 3.x** — `@task`/`@flow` decorators, `serve()`, deployment, cron scheduling
+- **Docker Compose (multi-service)** — Postgres + Prefect Server + Worker containers
+- **dbt profiles.yml** — connection config for containerized environments
+
+## Architecture
+GitHub API → Prefect Flow (tasks) → PostgreSQL → dbt build → Star Schema
+                ↑                          ↑
+           Prefect Server (UI:4200)    Postgres (5432)
+                ↑
+           Worker (runs flow code)
+
+## Project Structure Added
+github-pipline/
+├── flows/
+│   ├── ingestion_flow.py   — @task / @flow wrapping ingest + dbt
+│   └── deploy.py            — serve() with daily cron
+├── Dockerfile               — Python + dbt container image
+├── Makefile                 — one-command targets (up, run, all)
+├── dbt_transforms/
+│   └── profiles.yml         — dbt connection config (uses env vars)
+
+## Key Commands
+```bash
+make all                    # start everything + serve the flow
+make up                     # docker compose up -d only
+
+# Trigger a manual run
+docker compose exec worker prefect deployment run 'ingestion-pipeline/github-pipeline'
+
+# Check data
+docker compose exec postgres psql -U postgres -d github_analytics -c "SELECT COUNT(*) FROM raw_repos;"
+docker compose exec postgres psql -U postgres -d github_analytics -c "SELECT * FROM public_marts.dim_repositories ORDER BY stars DESC LIMIT 10;"

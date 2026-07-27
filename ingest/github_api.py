@@ -27,12 +27,12 @@ def _get(url, params=None, max_retries=3):
     return None
 
 
-def fetch_top_repos(num=50):
+def fetch_top_repos(num=50, language="python"):
     repos = []
     page = 1
     while len(repos) < num:
         data = _get(f"{BASE}/search/repositories", {
-            "q": "language:python",
+            "q": f"language:{language}",
             "sort": "stars",
             "order": "desc",
             "per_page": min(100, num),

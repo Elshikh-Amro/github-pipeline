@@ -1,0 +1,12 @@
+dbt_transforms:
+  outputs:
+    dev:
+      type: postgres
+      threads: 4
+      host: "{{ env_var('PGHOST', 'localhost') }}"
+      port: 5432
+      user: "{{ env_var('PGUSER', 'postgres') }}"
+      password: "{{ env_var('PGPASSWORD', 'postgres') }}"
+      dbname: "{{ env_var('PGDATABASE', 'github_analytics') }}"
+      schema: public
+  target: dev

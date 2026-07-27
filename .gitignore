@@ -2,3 +2,7 @@
 __pycache__/
 .env
 *.pyc
+.prefect/
+prefect.db
+__pycache__/
+*.pyc
