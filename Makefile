@@ -26,4 +26,4 @@ all: up
 	@sleep 10
 	@echo "Pipeline is serving on http://localhost:4200"
 	@echo "The first run will trigger automatically on the cron schedule (daily at 6am)."
-	@echo "Or trigger one now: docker compose exec worker python -c \"from ingestion_flow import ingestion_pipeline; ingestion_pipeline()\""
+	@echo "Or trigger one now: docker compose exec worker python -c \"from flows.ingestion_flow import ingestion_pipeline; ingestion_pipeline()\""
