@@ -129,3 +129,36 @@ docker compose exec worker prefect deployment run 'ingestion-pipeline/github-pip
 # Check data
 docker compose exec postgres psql -U postgres -d github_analytics -c "SELECT COUNT(*) FROM raw_repos;"
 docker compose exec postgres psql -U postgres -d github_analytics -c "SELECT * FROM public_marts.dim_repositories ORDER BY stars DESC LIMIT 10;"
+
+# Week 4 — Visualization & Polish ✅
+
+## Tools Learned
+- **Metabase** — BI dashboards; auto-provisioning via REST API (`/api/setup`, `/api/session`, `/api/card`, `/api/dashboard`)
+- **dbt source freshness** — `dbt source freshness` command surfaces source staleness warnings/errors
+- **Docker initdb** — `.docker-entrypoint-initdb.d` runs once on a **fresh** volume only (gotcha: existing volumes need manual DB creation)
+- **Docker healthchecks + Makefile orchestration** — idempotent `make up`
+
+## What Changed
+| Item | Detail |
+|------|--------|
+| `metabase/` | `provision.py` — auto-setup Metabase, connect Postgres, build 3 cards + dashboard |
+| `docker/initdb/` | `01-create-metabase-db.sql` — creates `metabase` DB on fresh volumes |
+| `Makefile` | `make up` starts postgres first, ensures `metabase` DB exists, then starts everything; `make setup-metabase` runs `provision.py` |
+| `flows/ingestion_flow.py` | Added `task_source_freshness` running `dbt source freshness` after `dbt build` |
+| dbt marts | `dim_dates` gains `date_key`; `fact_commits`/`fact_issues` join it; `dim_repositories` gains `stars`; relationship tests added |
+| ingest | `fetch_issues` fetches `state=all`; `raw_issues` gains `closed_at`/`fetched_at`; issue upsert updates state + closed_at |
+
+## Dashboards (auto-provisioned)
+`make setup-metabase` creates (idempotently):
+- **Trending Repos** — top Python repos by stars (bar)
+- **Commit Velocity** — commits per day (line)
+- **Issue Closure by Repo** — open vs closed issues per repo (bar)
+
+## How to Run
+```bash
+cd ~/OpenCode/github-pipline
+make up                              # postgres → metabase DB → all services
+docker compose exec worker python -c "from flows.ingestion_flow import ingestion_pipeline; ingestion_pipeline()"
+make setup-metabase                  # wait for Metabase, then provision dashboards
+```
+Open http://localhost:3000 → login `admin@example.com` / `metabase-pass-123` (override via `METABASE_EMAIL`/`METABASE_PASSWORD` in `.env`).

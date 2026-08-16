@@ -23,7 +23,7 @@ EL Pipeline — fetch data, store in PostgreSQL raw tables
 Files: docker-compose.yml, ingest/{github_api,db,main}.py
 Tables: raw_repos, raw_commits, raw_issues
 
-## Week 2 — dbt Transformations
+## Week 2 ✅ DONE
 - Install dbt-core + dbt-postgres
 - dbt_project.yml, sources.yml
 - Staging models: stg_repos.sql, stg_commits.sql, stg_issues.sql
@@ -32,19 +32,19 @@ Tables: raw_repos, raw_commits, raw_issues
 - dbt docs (lineage graph)
 - Concepts: dimensional modeling, materializations, incremental models
 
-## Week 3 — Prefect Orchestration
+## Week 3 ✅ DONE
 - Wrap Python ingestion into Prefect flows
 - Task dependencies, retry logic
 - Scheduled daily runs
 - Logging, error handling
 - Parameterization (language/topic)
 
-## Week 4 — Visualization & Polish
+## Week 4 ✅ DONE
 - Connect Metabase to PostgreSQL
-- Dashboards: trending repos, commit velocity, issue closure rates
+- Dashboards: trending repos, commit velocity, issue closure rates (auto-provisioned via metabase/provision.py)
 - dbt source freshness tests
 - Docker Compose for everything (not just DB)
-- Stretch: Great Expectations, GitHub Actions CI/CD, Redpanda streaming
+- Stretch (future): Great Expectations, GitHub Actions CI/CD, Redpanda streaming
 
 ---
 

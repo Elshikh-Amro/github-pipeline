@@ -80,7 +80,7 @@ def fetch_commits(owner, repo, max_pages=2):
 
 def fetch_issues(owner, repo):
     data = _get(f"{BASE}/repos/{owner}/{repo}/issues", {
-        "state": "open",
+        "state": "all",
         "per_page": 50,
     })
     if not data:
@@ -91,4 +91,5 @@ def fetch_issues(owner, repo):
         "title": i["title"],
         "state": i["state"],
         "created_at": i["created_at"],
+        "closed_at": i.get("closed_at"),
     } for i in data]

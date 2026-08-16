@@ -10,6 +10,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - prefect_pgdata:/var/lib/postgresql/prefect_data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -24,6 +25,11 @@ services:
       PREFECT_API_DATABASE_CONNECTION_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/github_analytics"
     ports:
       - "4200:4200"
+    healthcheck:
+      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:4200/api/health')\"" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     depends_on:
       postgres:
         condition: service_healthy
@@ -37,9 +43,23 @@ services:
       DBT_ALLOW_EXPERIMENTAL_ADAPTERS: "true"
     depends_on:
       prefect-server:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - .:/app
+  metabase:
+    image: metabase/metabase:latest
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: postgres
+      MB_DB_PASS: postgres
+      MB_DB_HOST: postgres
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
 volumes:
   pgdata:
   prefect_pgdata:

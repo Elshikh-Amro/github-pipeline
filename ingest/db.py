@@ -35,7 +35,8 @@ def create_tables(conn):
                 repo_name TEXT,
                 author_name TEXT,
                 message TEXT,
-                committed_at TIMESTAMPTZ
+                committed_at TIMESTAMPTZ,
+                fetched_at TIMESTAMPTZ DEFAULT NOW()
             );
         """)
         cur.execute("""
@@ -44,9 +45,15 @@ def create_tables(conn):
                 repo_name TEXT,
                 title TEXT,
                 state TEXT,
-                created_at TIMESTAMPTZ
+                created_at TIMESTAMPTZ,
+                closed_at TIMESTAMPTZ,
+                fetched_at TIMESTAMPTZ DEFAULT NOW()
             );
         """)
+        # Idempotent migration for databases created before Week 4
+        cur.execute("ALTER TABLE raw_commits ADD COLUMN IF NOT EXISTS fetched_at TIMESTAMPTZ DEFAULT NOW();")
+        cur.execute("ALTER TABLE raw_issues ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ;")
+        cur.execute("ALTER TABLE raw_issues ADD COLUMN IF NOT EXISTS fetched_at TIMESTAMPTZ DEFAULT NOW();")
     conn.commit()
 
 
@@ -86,13 +93,15 @@ def save_commits(conn, commits):
 def save_issues(conn, issues):
     if not issues:
         return 0
-    rows = [(i["id"], i["repo_name"], i["title"], i["state"], i["created_at"])
+    rows = [(i["id"], i["repo_name"], i["title"], i["state"], i["created_at"], i.get("closed_at"))
             for i in issues]
     with conn.cursor() as cur:
         cur.executemany("""
-            INSERT INTO raw_issues (id, repo_name, title, state, created_at)
-            VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (id) DO NOTHING;
+            INSERT INTO raw_issues (id, repo_name, title, state, created_at, closed_at)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (id) DO UPDATE SET
+                state = EXCLUDED.state,
+                closed_at = EXCLUDED.closed_at;
         """, rows)
     conn.commit()
     return len(rows)

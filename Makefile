@@ -1,6 +1,12 @@
-.PHONY: up deploy run all
+.PHONY: up deploy run all setup-metabase
 
 up:
+	docker compose up -d postgres
+	@echo "Waiting for postgres to be healthy..."
+	@sleep 5
+	@echo "Ensuring metabase database exists..."
+	@docker compose exec -T postgres psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='metabase'" | grep -q 1 \
+		|| docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE metabase"
 	docker compose up -d
 
 deploy:
@@ -9,11 +15,13 @@ deploy:
 run:
 	docker compose exec worker prefect deployment run 'ingestion-pipeline/github-pipeline'
 
+setup-metabase:
+	python metabase/provision.py
+
 logs:
 	docker compose logs -f worker
 
-all:
-	docker compose up -d
+all: up
 	@echo "Waiting for services..."
 	@sleep 10
 	@echo "Pipeline is serving on http://localhost:4200"

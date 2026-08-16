@@ -16,5 +16,4 @@ models:
       - name: state
         tests:
           - accepted_values:
-              arguments:
-                values: ['open', 'closed']
+              values: ['open', 'closed']

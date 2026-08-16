@@ -12,6 +12,24 @@ models:
       - name: repo_id
         tests:
           - relationships:
-              arguments:
-                to: ref('dim_repositories')
-                field: repo_id
+              to: ref('dim_repositories')
+              field: repo_id
+      - name: date_key
+        tests:
+          - relationships:
+              to: ref('dim_dates')
+              field: date_key
+  - name: fact_issues
+    columns:
+      - name: issue_id
+        tests: [unique, not_null]
+      - name: repo_id
+        tests:
+          - relationships:
+              to: ref('dim_repositories')
+              field: repo_id
+      - name: date_key
+        tests:
+          - relationships:
+              to: ref('dim_dates')
+              field: date_key

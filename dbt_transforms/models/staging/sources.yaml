@@ -6,5 +6,17 @@ sources:
     schema: public
     tables:
       - name: raw_repos
+        loaded_at_field: fetched_at
+        freshness:
+          warn_after: {count: 1, period: day}
+          error_after: {count: 3, period: day}
       - name: raw_commits
+        loaded_at_field: fetched_at
+        freshness:
+          warn_after: {count: 1, period: day}
+          error_after: {count: 3, period: day}
       - name: raw_issues
+        loaded_at_field: fetched_at
+        freshness:
+          warn_after: {count: 1, period: day}
+          error_after: {count: 3, period: day}

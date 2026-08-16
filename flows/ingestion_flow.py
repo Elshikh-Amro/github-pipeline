@@ -72,6 +72,20 @@ def task_run_dbt():
     return result.returncode
 
 
+@task
+def task_source_freshness():
+    result = subprocess.run(
+        ["dbt", "source", "freshness"],
+        cwd=os.path.abspath("dbt_transforms"),
+        capture_output=True,
+        text=True,
+    )
+    print(result.stdout[-500:] if len(result.stdout) > 500 else result.stdout)
+    if result.returncode not in (0, 1):
+        raise RuntimeError(f"dbt source freshness failed:\n{result.stderr[-1000:]}")
+    return result.returncode
+
+
 @flow(log_prints=True)
 def ingestion_pipeline(
     language: str = "python",
@@ -103,6 +117,8 @@ def ingestion_pipeline(
     if run_dbt:
         dbt_result = task_run_dbt()
         print(f"dbt build completed with exit code {dbt_result}")
+        freshness = task_source_freshness()
+        print(f"dbt source freshness exit code: {freshness}")
 
     print("Pipeline complete!")
     return {"repos": repo_count, "commits": commit_count, "issues": issue_count}

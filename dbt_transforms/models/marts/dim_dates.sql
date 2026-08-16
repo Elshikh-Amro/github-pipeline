@@ -8,6 +8,7 @@ WITH date_spine AS (
     FROM {{ ref('stg_issues') }}
 )
 SELECT
+    TO_CHAR(date_day, 'YYYYMMDD')::INT AS date_key,
     date_day,
     EXTRACT(YEAR FROM date_day) AS year,
     EXTRACT(MONTH FROM date_day) AS month,
