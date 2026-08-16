@@ -242,13 +242,31 @@ def provision(session_id):
     print(f"\nDone! Open your dashboard: {METABASE_URL}/dashboard/{dash_id}")
 
 
+def find_dashboard_url(session_id):
+    dashboards = api(session_id, "GET", "/api/dashboard")
+    dashboards = dashboards if isinstance(dashboards, list) else dashboards.get("data", [])
+    dash = next((d for d in dashboards if d.get("name") == "GitHub Analytics"), None)
+    if dash:
+        return f"{METABASE_URL}/dashboard/{dash['id']}"
+    return None
+
+
 def main():
+    import sys
+
+    url_only = "--print-dashboard-url" in sys.argv
     wait_for_health()
     session_id = get_session()
     if session_id is None:
         session_id = setup_new_instance()
     if not session_id:
         raise SystemExit("Could not obtain a Metabase session.")
+    if url_only:
+        url = find_dashboard_url(session_id)
+        if not url:
+            raise SystemExit("Dashboard not found.")
+        print(url)
+        return
     provision(session_id)
 
 
